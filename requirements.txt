@@ -1,0 +1,5 @@
+python-telegram-bot==13.2
+pytimeparse==1.1.8
+ptbot==0.0.13
+python-dotenv==1.0.0
+apscheduler==3.10.4
