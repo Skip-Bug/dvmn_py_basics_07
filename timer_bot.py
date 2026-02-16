@@ -4,10 +4,6 @@ from pytimeparse import parse
 from dotenv import load_dotenv
 
 
-load_dotenv()
-TG_TOKEN = os.getenv("TG_TOKEN")
-
-
 def connect_bot(token):
     bot = ptbot.Bot(token)
     return bot
@@ -17,22 +13,32 @@ def wait(chat_id, question, bot):
     seconds = parse(question)
 
     if not seconds:
-        bot.send_message(chat_id, """Не правильно заданно время,
-        пиши: 5s, 5m, или 1h""")
+        bot.send_message(
+            chat_id,
+            """Не правильно заданно время,
+пиши: 5s, 5m, или 1h"""
+        )
         return
     progress_barr = render_progressbar(seconds, 0)
     message_id = bot.send_message(
         chat_id, f"Запускаю таймер...\n{progress_barr}"
     )
 
-    def progress_callback(secs_left):
-        notify_progress(secs_left, chat_id, message_id, seconds, bot)
-
-    def timer_callback():
-        timer(chat_id, question, bot)
-
-    bot.create_countdown(seconds, progress_callback)
-    bot.create_timer(seconds, timer_callback)
+    bot.create_countdown(
+        seconds,
+        notify_progress,
+        chat_id=chat_id,
+        message_id=message_id,
+        total_seconds=seconds,
+        bot=bot
+    )
+    bot.create_timer(
+        seconds,
+        timer,
+        chat_id=chat_id,
+        message_id=message_id,
+        bot=bot
+    )
 
 
 def notify_progress(secs_left, chat_id, message_id, total_seconds, bot):
@@ -50,13 +56,13 @@ def notify_progress(secs_left, chat_id, message_id, total_seconds, bot):
     bot.update_message(
         chat_id,
         message_id,
-        f"Осталось {time_text}!\n {progress_barr}"
+        f"Осталось {time_text}!\n{progress_barr}"
     )
 
 
-def timer(chat_id, message, bot):
+def timer(chat_id, message_id, bot):
     answer = "Время вышло"
-    bot.send_message(chat_id, answer)
+    bot.update_message(chat_id, message_id, answer)
 
 
 def render_progressbar(
@@ -70,18 +76,17 @@ def render_progressbar(
     return '{0} |{1}| {2}% {3}'.format(prefix, pbar, percent, suffix)
 
 
-def handle_message(chat_id, question, bot):
-    wait(chat_id, question, bot)
+def handle_message(chat_id, question):
+    wait(chat_id, question, main.bot)
 
 
 def main():
-    bot = connect_bot(TG_TOKEN)
+    load_dotenv()
+    token = os.getenv("TG_TOKEN")
+    main.bot = connect_bot(token)
 
-    def message_handler(chat_id, question):
-        handle_message(chat_id, question, bot)
-
-    bot.reply_on_message(message_handler)
-    bot.run_bot()
+    main.bot.reply_on_message(handle_message)
+    main.bot.run_bot()
 
 
 if __name__ == '__main__':
