@@ -15,8 +15,7 @@ def wait(chat_id, question, bot):
     if not seconds:
         bot.send_message(
             chat_id,
-            """Не правильно заданно время,
-пиши: 5s, 5m, или 1h"""
+            """Не правильно заданно время, пиши: 5s, 5m, или 1h"""
         )
         return
     progress_barr = render_progressbar(seconds, 0)
@@ -76,17 +75,13 @@ def render_progressbar(
     return '{0} |{1}| {2}% {3}'.format(prefix, pbar, percent, suffix)
 
 
-def handle_message(chat_id, question):
-    wait(chat_id, question, main.bot)
-
 
 def main():
     load_dotenv()
     token = os.getenv("TG_TOKEN")
-    main.bot = connect_bot(token)
-
-    main.bot.reply_on_message(handle_message)
-    main.bot.run_bot()
+    bot = connect_bot(token)
+    bot.reply_on_message(wait, bot=bot)
+    bot.run_bot()
 
 
 if __name__ == '__main__':
