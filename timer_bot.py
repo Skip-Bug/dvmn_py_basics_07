@@ -4,11 +4,6 @@ from pytimeparse import parse
 from dotenv import load_dotenv
 
 
-def connect_bot(token):
-    bot = ptbot.Bot(token)
-    return bot
-
-
 def wait(chat_id, question, bot):
     seconds = parse(question)
 
@@ -79,7 +74,7 @@ def render_progressbar(
 def main():
     load_dotenv()
     token = os.getenv("TG_TOKEN")
-    bot = connect_bot(token)
+    bot = ptbot.Bot(token)
     bot.reply_on_message(wait, bot=bot)
     bot.run_bot()
 
