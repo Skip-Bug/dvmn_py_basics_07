@@ -70,7 +70,6 @@ def render_progressbar(
     return '{0} |{1}| {2}% {3}'.format(prefix, pbar, percent, suffix)
 
 
-
 def main():
     load_dotenv()
     token = os.getenv("TG_TOKEN")
